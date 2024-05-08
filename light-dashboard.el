@@ -93,17 +93,20 @@ keymap."
 	goal-column 0)
   (cursor-face-highlight-mode 1))
 
+(defun light-dashboard-column-width ()
+  "Calculate column width for the dashboard in number of characters."
+  (+ (apply #'max
+	    (mapcar (lambda (x) (length (car x)))
+		    (apply #'append (mapcar #'cdr light-dashboard-list))))
+     light-dashboard-right-margin))
+
 ;;;###autoload
 (defun light-dashboard-open ()
   "Open `light-dashboard'."
   (interactive)
   (switch-to-buffer light-dashboard-buffer-name)
   (let ((inhibit-read-only t)
-	(longest
-	 (+ (apply #'max
-		   (mapcar (lambda (x) (length (car-safe x)))
-			   light-dashboard-list))
-	    light-dashboard-right-margin))
+	(longest (light-dashboard-column-width))
 	(buffer-map (make-sparse-keymap)))
     (unless (derived-mode-p 'light-dashboard-mode)
       (light-dashboard-mode))
