@@ -110,35 +110,38 @@ keymap."
     'face 'light-dashboard-section)
    (propertize "\n" 'intangible t)
    (mapconcat
-    (lambda (item)
-      (let ((map (make-sparse-keymap))
-	    (command
-	     (pcase (cadr item)
-	       ((pred listp)
-		(lambda ()
-		  (interactive)
-		  (eval (cadr item))))
-	       ((pred symbolp) (cadr item)))))
-	(keymap-set map "<mouse-1>" command)
-	(keymap-set map "RET" command)
-	(concat
-	 (propertize
-	  (car item)
-	  'item t
-	  'keymap map
-	  'line-prefix
-	  `(space . (:align-to (- center ,(/ column-width 2))))
-	  'cursor-face 'light-dashboard-selected-face
-	  'mouse-face 'light-dashboard-selected-face)
-	 (when (caddr item)
-	   (keymap-set buffer-map (caddr item) command)
-	   (concat
-	    (make-string (- column-width (length (car item))) ? )
-	    (propertize
-	     (caddr item)
-	     'face 'light-dashboard-key))))))
+    (apply-partially #'light-dashboard-form-item
+		     column-width buffer-map)
     (cdr section)
     (propertize "\n" 'intangible t))))
+
+(defun light-dashboard-form-item (column-width buffer-map item)
+  (let ((map (make-sparse-keymap))
+	(command
+	 (pcase (cadr item)
+	   ((pred listp)
+	    (lambda ()
+	      (interactive)
+	      (eval (cadr item))))
+	   ((pred symbolp) (cadr item)))))
+    (keymap-set map "<mouse-1>" command)
+    (keymap-set map "RET" command)
+    (concat
+     (propertize
+      (car item)
+      'item t
+      'keymap map
+      'line-prefix
+      `(space . (:align-to (- center ,(/ column-width 2))))
+      'cursor-face 'light-dashboard-selected-face
+      'mouse-face 'light-dashboard-selected-face)
+     (when (caddr item)
+       (keymap-set buffer-map (caddr item) command)
+       (concat
+	(make-string (- column-width (length (car item))) ? )
+	(propertize
+	 (caddr item)
+	 'face 'light-dashboard-key))))))
 
 ;;;###autoload
 (defun light-dashboard-open ()
