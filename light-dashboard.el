@@ -122,16 +122,19 @@ keymap."
       (interactive)
       (eval command))))
 
-(defun light-dashboard-form-item (column-width buffer-map item)
-  (let ((map (make-sparse-keymap))
-	(command (light-dashboard--normalize-command (cadr item))))
+(defun light-dashboard--bind-map (command)
+  (let ((map (make-sparse-keymap)))
     (keymap-set map "<mouse-1>" command)
     (keymap-set map "RET" command)
+    map))
+
+(defun light-dashboard-form-item (column-width buffer-map item)
+  (let ((command (light-dashboard--normalize-command (cadr item))))
     (concat
      (propertize
       (car item)
       'item t
-      'keymap map
+      'keymap (light-dashboard--bind-map command)
       'line-prefix
       `(space . (:align-to (- center ,(/ column-width 2))))
       'cursor-face 'light-dashboard-selected-face
