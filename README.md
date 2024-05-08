@@ -16,16 +16,15 @@ A simple dashboard package that may be used as a startup screen in Emacs.
        :url "https://github.com/ichernyshovvv/light-dashboard"
        :branch "master")))
   :custom
-  (light-dashboard-list
-   '("Org Mode"
-     ("Org-Agenda (current day)" (org-agenda nil "a") "a")
-     ("Recipes" (find-file "/org/recipes.org"))
-     ("Inbox" (find-file "/org/inbox.org") "i")
-     "Downloads"
-     ("Transmission" transmission "t")
-     "Current Projects"
-     ("org-timeblock" (dired "~/.my-emacs-packages.d/active/org-timeblock/") "o")
-     ("chloe" (dired "~/.my-emacs-packages.d/active/chloe/") "x")))
+  (light-dashboard-alist
+   '(("Org Mode"
+      ("Org-Agenda (current day)" (org-agenda nil "a") "a")
+      ("Recipes" (find-file "/org/recipes.org"))
+      ("Inbox" (find-file "/org/inbox.org") "i"))
+     ("Downloads" ("Transmission" transmission "t"))
+     ("Current Projects"
+      ("org-timeblock" (dired "~/.my-emacs-packages.d/active/org-timeblock/") "o")
+      ("chloe" (dired "~/.my-emacs-packages.d/active/chloe/") "x"))))
   :config
   (light-dashboard-open))
 ```
