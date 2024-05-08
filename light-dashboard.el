@@ -51,7 +51,7 @@ The value of this variable is a list.  Acceptable elements:
   (\"Item text\" SYMBOL-OR-FORM [KEY])
 
 STRING is a name of a section
-SYMBOL-OR-FORM is form or a function symbol to execute
+SYMBOL-OR-FORM is a form or a function symbol to evaluate
 KEY is a string acceptable for `keymap-set'."
   :type '(repeat
 	  (choice
