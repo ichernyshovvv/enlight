@@ -101,19 +101,17 @@ keymap."
      light-dashboard-right-margin))
 
 (defun light-dashboard-form-section (column-width buffer-map section)
-  (concat
-   (propertize
-    (car section)
-    'line-prefix
-    `(space . (:align-to (- center ,(/ (length (car section)) 2))))
-    'intangible t
-    'face 'light-dashboard-section)
-   (propertize "\n" 'intangible t)
-   (mapconcat
-    (apply-partially #'light-dashboard-form-item
-		     column-width buffer-map)
-    (cdr section)
-    (propertize "\n" 'intangible t))))
+  (pcase-let ((`(,section-name . ,items) section))
+    (concat (propertize section-name
+                        'line-prefix
+                        `(space . (:align-to (- center ,(/ (length section-name) 2))))
+                        'intangible t
+                        'face 'light-dashboard-section)
+            (propertize "\n" 'intangible t)
+            (mapconcat
+             (apply-partially #'light-dashboard-form-item column-width buffer-map)
+             items
+             (propertize "\n" 'intangible t)))))
 
 (defun light-dashboard--normalize-command (command)
   (if (commandp command)
