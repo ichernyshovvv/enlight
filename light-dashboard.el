@@ -38,7 +38,7 @@
   :group 'applications
   :prefix "light-dashboard-")
 
-(defcustom light-dashboard-list
+(defcustom light-dashboard-alist
   '(("Org Mode"
      ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
     ("Other"
@@ -97,7 +97,7 @@ keymap."
   "Calculate column width for the dashboard in number of characters."
   (+ (apply #'max
 	    (mapcar (lambda (x) (length (car x)))
-		    (apply #'append (mapcar #'cdr light-dashboard-list))))
+		    (apply #'append (mapcar #'cdr light-dashboard-alist))))
      light-dashboard-right-margin))
 
 (defun light-dashboard-form-section (column-width buffer-map section)
@@ -161,7 +161,7 @@ keymap."
      (mapconcat
       (apply-partially #'light-dashboard-form-section
 		       longest buffer-map)
-      light-dashboard-list
+      light-dashboard-alist
       (propertize "\n" 'intangible t)))
     (keymap-set buffer-map "g" #'light-dashboard-open)
     (use-local-map buffer-map)
