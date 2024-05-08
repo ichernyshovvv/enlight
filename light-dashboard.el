@@ -129,23 +129,19 @@ keymap."
     map))
 
 (defun light-dashboard-form-item (column-width buffer-map item)
-  (let ((command (light-dashboard--normalize-command (cadr item))))
-    (concat
-     (propertize
-      (car item)
-      'item t
-      'keymap (light-dashboard--bind-map command)
-      'line-prefix
-      `(space . (:align-to (- center ,(/ column-width 2))))
-      'cursor-face 'light-dashboard-selected-face
-      'mouse-face 'light-dashboard-selected-face)
-     (when (caddr item)
-       (keymap-set buffer-map (caddr item) command)
-       (concat
-	(make-string (- column-width (length (car item))) ? )
-	(propertize
-	 (caddr item)
-	 'face 'light-dashboard-key))))))
+  (pcase-let ((`(,desc ,command ,shortcut) item))
+    (let ((command (light-dashboard--normalize-command command)))
+      (concat (propertize desc
+	                  'item t
+	                  'keymap (light-dashboard--bind-map command)
+	                  'line-prefix
+	                  `(space . (:align-to (- center ,(/ column-width 2))))
+	                  'cursor-face 'light-dashboard-selected-face
+	                  'mouse-face 'light-dashboard-selected-face)
+	      (when shortcut
+	        (keymap-set buffer-map shortcut command)
+	        (concat (make-string (- column-width (length desc)) ? )
+	                (propertize shortcut 'face 'light-dashboard-key)))))))
 
 ;;;###autoload
 (defun light-dashboard-open ()
