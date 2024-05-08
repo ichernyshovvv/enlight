@@ -100,6 +100,46 @@ keymap."
 		    (apply #'append (mapcar #'cdr light-dashboard-list))))
      light-dashboard-right-margin))
 
+(defun light-dashboard-form-section (column-width buffer-map section)
+  (concat
+   (propertize
+    (car section)
+    'line-prefix
+    `(space . (:align-to (- center ,(/ (length (car section)) 2))))
+    'intangible t
+    'face 'light-dashboard-section)
+   (propertize "\n" 'intangible t)
+   (mapconcat
+    (lambda (item)
+      (let ((map (make-sparse-keymap))
+	    (command
+	     (pcase (cadr item)
+	       ((pred listp)
+		(lambda ()
+		  (interactive)
+		  (eval (cadr item))))
+	       ((pred symbolp) (cadr item)))))
+	(keymap-set map "<mouse-1>" command)
+	(keymap-set map "RET" command)
+	(concat
+	 (propertize
+	  (car item)
+	  'item t
+	  'keymap map
+	  'line-prefix
+	  `(space . (:align-to (- center ,(/ column-width 2))))
+	  'cursor-face 'light-dashboard-selected-face
+	  'mouse-face 'light-dashboard-selected-face)
+	 (when (caddr item)
+	   (keymap-set buffer-map (caddr item) command)
+	   (concat
+	    (make-string (- column-width (length (car item))) ? )
+	    (propertize
+	     (caddr item)
+	     'face 'light-dashboard-key))))))
+    (cdr section)
+    (propertize "\n" 'intangible t))))
+
 ;;;###autoload
 (defun light-dashboard-open ()
   "Open `light-dashboard'."
@@ -116,42 +156,8 @@ keymap."
 		 'line-height (* (line-pixel-height)
 				 (1- (/ (window-height) 2))))
      (mapconcat
-      (lambda (item)
-	(cond
-	 ((listp item)
-	  (let ((map (make-sparse-keymap))
-		(command
-		 (pcase (cadr item)
-		   ((pred listp)
-		    (lambda ()
-		      (interactive)
-		      (eval (cadr item))))
-		   ((pred symbolp) (cadr item)))))
-	    (keymap-set map "<mouse-1>" command)
-	    (keymap-set map "RET" command)
-	    (concat
-	     (propertize
-	      (car item)
-	      'item t
-	      'keymap map
-	      'line-prefix
-	      `(space . (:align-to (- center ,(/ longest 2))))
-	      'cursor-face 'light-dashboard-selected-face
-	      'mouse-face 'light-dashboard-selected-face)
-	     (when (caddr item)
-	       (keymap-set buffer-map (caddr item) command)
-	       (concat
-		(make-string (- longest (length (car item))) ? )
-		(propertize
-		 (caddr item)
-		 'face 'light-dashboard-key))))))
-	 ((stringp item)
-	  (propertize
-	   item
-	   'line-prefix
-	   `(space . (:align-to (- center ,(/ (length item) 2))))
-	   'intangible t
-	   'face 'light-dashboard-section))))
+      (apply-partially #'light-dashboard-form-section
+		       longest buffer-map)
       light-dashboard-list
       (propertize "\n" 'intangible t)))
     (keymap-set buffer-map "g" #'light-dashboard-open)
