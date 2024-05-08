@@ -101,6 +101,7 @@ keymap."
      light-dashboard-right-margin))
 
 (defun light-dashboard-form-section (column-width buffer-map section)
+  "Form SECTION, bind commands in BUFFER-MAP and return as a string."
   (pcase-let ((`(,section-name . ,items) section))
     (concat (propertize section-name
                         'line-prefix
@@ -114,6 +115,7 @@ keymap."
              (propertize "\n" 'intangible t)))))
 
 (defun light-dashboard--normalize-command (command)
+  "Normalize COMMAND."
   (if (commandp command)
       command
     (lambda ()
@@ -121,12 +123,14 @@ keymap."
       (eval command))))
 
 (defun light-dashboard--bind-map (command)
+  "Return a new keymap with COMMAND bound to mouse-1 and RET."
   (let ((map (make-sparse-keymap)))
     (keymap-set map "<mouse-1>" command)
     (keymap-set map "RET" command)
     map))
 
 (defun light-dashboard-form-item (column-width buffer-map item)
+  "Form ITEM, bind commands in BUFFER-MAP and return as a string."
   (pcase-let ((`(,desc ,command ,shortcut) item))
     (let ((command (light-dashboard--normalize-command command)))
       (concat (propertize desc
