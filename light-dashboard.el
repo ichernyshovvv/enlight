@@ -115,15 +115,16 @@ keymap."
     (cdr section)
     (propertize "\n" 'intangible t))))
 
+(defun light-dashboard--normalize-command (command)
+  (if (commandp command)
+      command
+    (lambda ()
+      (interactive)
+      (eval command))))
+
 (defun light-dashboard-form-item (column-width buffer-map item)
   (let ((map (make-sparse-keymap))
-	(command
-	 (pcase (cadr item)
-	   ((pred listp)
-	    (lambda ()
-	      (interactive)
-	      (eval (cadr item))))
-	   ((pred symbolp) (cadr item)))))
+	(command (light-dashboard--normalize-command (cadr item))))
     (keymap-set map "<mouse-1>" command)
     (keymap-set map "RET" command)
     (concat
