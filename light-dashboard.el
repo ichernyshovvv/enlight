@@ -58,6 +58,10 @@ KEY is a string acceptable for `keymap-set'."
 	   (string :tag "Section name")
 	   (list string (choice function list) string))))
 
+(defcustom light-dashboard-right-margin 5
+  "Right margin applied after the items column, in number of characters."
+  :type 'integer)
+
 ;;;; Faces
 
 (defface light-dashboard-selected-face
@@ -92,7 +96,7 @@ KEY is a string acceptable for `keymap-set'."
 	 (+ (apply #'max
 		   (mapcar (lambda (x) (length (car-safe x)))
 			   light-dashboard-list))
-	    5))
+	    light-dashboard-right-margin))
 	(buffer-map (make-sparse-keymap)))
     (light-dashboard-mode)
     (erase-buffer)
