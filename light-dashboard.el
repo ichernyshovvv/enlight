@@ -98,7 +98,8 @@ KEY is a string acceptable for `keymap-set'."
 			   light-dashboard-list))
 	    light-dashboard-right-margin))
 	(buffer-map (make-sparse-keymap)))
-    (light-dashboard-mode)
+    (unless (derived-mode-p 'light-dashboard-mode)
+      (light-dashboard-mode))
     (erase-buffer)
     (insert
      (propertize "\n"
