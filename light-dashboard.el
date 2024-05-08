@@ -33,6 +33,11 @@
 
 ;;;; Defcustoms
 
+(defgroup light-dashboard nil
+  "Simple dashboard."
+  :group 'applications
+  :prefix "light-dashboard-")
+
 (defcustom light-dashboard-list
   '("Org Mode"
     ("Org-Agenda (current day)" (org-agenda nil "a") "a")
@@ -48,7 +53,6 @@ The value of this variable is a list.  Acceptable elements:
 STRING is a name of a section
 SYMBOL-OR-FORM is form or a function symbol to execute
 KEY is a string acceptable for `keymap-set'."
-  :group 'light-dashboard
   :type '(repeat
 	  (choice
 	   (string :tag "Section name")
@@ -58,18 +62,15 @@ KEY is a string acceptable for `keymap-set'."
 
 (defface light-dashboard-selected-face
   '((t (:underline t)))
-  "Face used for currently selected item."
-  :group 'light-dashboard)
+  "Face used for currently selected item.")
 
 (defface light-dashboard-section
   '((t (:inherit font-lock-keyword-face)))
-  "Face used for sections."
-  :group 'light-dashboard)
+  "Face used for sections.")
 
 (defface light-dashboard-key
   '((t (:inherit font-lock-constant-face)))
-  "Face used for key strings."
-  :group 'light-dashboard)
+  "Face used for key strings.")
 
 ;;; Vars and functions
 
