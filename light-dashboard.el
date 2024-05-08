@@ -39,24 +39,31 @@
   :prefix "light-dashboard-")
 
 (defcustom light-dashboard-list
-  '("Org Mode"
-    ("Org-Agenda (current day)" (org-agenda nil "a") "a")
-    "Other"
-    ("Projects" project-switch-project "p"))
+  '(("Org Mode"
+     ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
+    ("Other"
+     ("Projects" project-switch-project "p")))
   "List of items and sections in the dashboard.
 
-The value of this variable is a list.  Acceptable elements:
+The value of this variable is an alist of the form:
 
-  STRING
+  ((\"Section-1\" ITEM ITEM ...)
+   (\"Section-2\" ITEM ITEM ...)
+   ...)
+
+Where ITEM is of the form:
+
   (\"Item text\" SYMBOL-OR-FORM [KEY])
 
-STRING is a name of a section
-SYMBOL-OR-FORM is a form or a function symbol to evaluate
-KEY is a string acceptable for `keymap-set'."
-  :type '(repeat
-	  (choice
-	   (string :tag "Section name")
-	   (list string (choice function list) string))))
+SYMBOL-OR-FORM is a form or a function symbol.  If it's a
+function symbol, the function will be called when a user presses
+RET or clicks on that item.
+
+KEY is a string acceptable for `keymap-set'.  If it is specified,
+the SYMBOL-OR-FORM is bound to this key in the dashboard buffer
+keymap."
+  :type '(alist :key-type string
+		:value-type (list string (choice function list) string)))
 
 (defcustom light-dashboard-right-margin 5
   "Right margin applied after the items column, in number of characters."
