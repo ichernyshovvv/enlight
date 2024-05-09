@@ -30,6 +30,8 @@
 ;;; Code:
 
 (require 'text-property-search)
+(require 'subr-x)
+(require 'seq)
 
 ;;;; Defcustoms
 
@@ -38,6 +40,7 @@
   :group 'applications
   :prefix "light-dashboard-")
 
+;; TODO: add setter to update dashboard/keymap on change
 (defcustom light-dashboard-alist
   '(("Org Mode"
      ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
@@ -63,7 +66,7 @@ KEY is a string acceptable for `keymap-set'.  If it is specified,
 the SYMBOL-OR-FORM is bound to this key in the dashboard buffer
 keymap."
   :type '(alist :key-type string
-		:value-type (list string (choice function list) string)))
+                :value-type (list string (choice function list) string)))
 
 (defcustom light-dashboard-right-margin 5
   "Right margin applied after the items column, in number of characters."
@@ -89,31 +92,12 @@ keymap."
 
 (define-derived-mode light-dashboard-mode
   special-mode "Light Dashboard"
-  (setq cursor-type nil
-	goal-column 0)
-  (cursor-face-highlight-mode 1))
+  (setq goal-column 0)
+  (when (fboundp #'cursor-face-highlight-mode)
+    (setq cursor-type nil)
+    (cursor-face-highlight-mode 1)))
 
-(defun light-dashboard-column-width ()
-  "Calculate column width for the dashboard in number of characters."
-  (+ (apply #'max
-	    (mapcar (lambda (x) (length (car x)))
-		    (apply #'append (mapcar #'cdr light-dashboard-alist))))
-     light-dashboard-right-margin))
-
-(defun light-dashboard-form-section (column-width buffer-map section)
-  "Form SECTION, bind commands in BUFFER-MAP and return as a string."
-  (pcase-let ((`(,section-name . ,items) section))
-    (concat (propertize section-name
-                        'line-prefix
-                        `(space . (:align-to (- center ,(/ (length section-name) 2))))
-                        'intangible t
-                        'face 'light-dashboard-section)
-            (propertize "\n" 'intangible t)
-            (mapconcat
-             (apply-partially #'light-dashboard-form-item column-width buffer-map)
-             items
-             (propertize "\n" 'intangible t)))))
-
+;; TODO: use a macro to avoid `eval' and extra `lambda' wrapping
 (defun light-dashboard--normalize-command (command)
   "Normalize COMMAND."
   (if (commandp command)
@@ -122,6 +106,7 @@ keymap."
       (interactive)
       (eval command))))
 
+;; TODO: use button.el to avoid manual binding?
 (defun light-dashboard--bind-map (command)
   "Return a new keymap with COMMAND bound to mouse-1 and RET."
   (let ((map (make-sparse-keymap)))
@@ -129,44 +114,75 @@ keymap."
     (keymap-set map "RET" command)
     map))
 
-(defun light-dashboard-form-item (column-width buffer-map item)
-  "Form ITEM, bind commands in BUFFER-MAP and return as a string."
+(defun light-dashboard--form-item (column-width buffer-map item)
+  "Format ITEM using COLUMN-WIDTH, bind commands in BUFFER-MAP."
   (pcase-let ((`(,desc ,command ,shortcut) item))
     (let ((command (light-dashboard--normalize-command command)))
-      (concat (propertize desc
-	                  'item t
-	                  'keymap (light-dashboard--bind-map command)
-	                  'line-prefix
-	                  `(space . (:align-to (- center ,(/ column-width 2))))
-	                  'cursor-face 'light-dashboard-selected-face
-	                  'mouse-face 'light-dashboard-selected-face)
-	      (when shortcut
-	        (keymap-set buffer-map shortcut command)
-	        (concat (make-string (- column-width (length desc)) ? )
-	                (propertize shortcut 'face 'light-dashboard-key)))))))
+      (concat
+       (propertize desc
+                   'item t
+                   'keymap (light-dashboard--bind-map command)
+                   'line-prefix
+                   `(space . (:align-to (- center ,(/ column-width 2))))
+                   'cursor-face 'light-dashboard-selected-face
+                   'mouse-face 'light-dashboard-selected-face)
+       (when shortcut
+         (keymap-set buffer-map shortcut command)
+         (concat (make-string (- column-width (length desc)) ? )
+                 (propertize shortcut 'face 'light-dashboard-key)))))))
+
+(defun light-dashboard--form-section (column-width buffer-map section)
+  "Format SECTION using COLUMN-WIDTH, bind commands in BUFFER-MAP."
+  (pcase-let ((`(,section-name . ,items) section))
+    (concat
+     (propertize section-name
+                 'line-prefix
+                 `(space . (:align-to (- center ,(/ (length section-name) 2))))
+                 'intangible t
+                 'face 'light-dashboard-section)
+     (propertize "\n" 'intangible t)
+     (mapconcat (apply-partially #'light-dashboard--form-item column-width buffer-map)
+                items
+                (propertize "\n" 'intangible t)))))
+
+(defun light-dashboard--max-item-length (alist)
+  "Calculate max length of item-names in ALIST."
+  (thread-last alist
+    (seq-mapcat #'cdr)
+    (seq-map (lambda (x) (length (car x))))
+    (seq-max)))
+
+(defun light-dashboard--top-margin-height ()
+  "Calculate top margin height to center dashboard properly."
+  (* (line-pixel-height)
+     (1- (/ (window-height) 2))))
+
+(defun light-dashboard--form-dashboard ()
+  "Format `light-dashboard-alist'."
+  (let ((column-width (+ (light-dashboard--max-item-length light-dashboard-alist)
+                         light-dashboard-right-margin))
+        ;; TODO: use the mode keymap
+        (buffer-map (make-sparse-keymap)))
+    (keymap-set buffer-map "g" #'light-dashboard-open)
+    (keymap-set buffer-map "q" #'quit-window)
+    (use-local-map buffer-map)
+    (concat (propertize "\n"
+                        'line-height (light-dashboard--top-margin-height))
+            (mapconcat
+             (apply-partially #'light-dashboard--form-section column-width buffer-map)
+             light-dashboard-alist
+             (propertize "\n" 'intangible t)))))
 
 ;;;###autoload
 (defun light-dashboard-open ()
   "Open `light-dashboard'."
   (interactive)
   (switch-to-buffer light-dashboard-buffer-name)
-  (let ((inhibit-read-only t)
-	(longest (light-dashboard-column-width))
-	(buffer-map (make-sparse-keymap)))
+  (let ((inhibit-read-only t))
     (unless (derived-mode-p 'light-dashboard-mode)
       (light-dashboard-mode))
     (erase-buffer)
-    (insert
-     (propertize "\n"
-		 'line-height (* (line-pixel-height)
-				 (1- (/ (window-height) 2))))
-     (mapconcat
-      (apply-partially #'light-dashboard-form-section
-		       longest buffer-map)
-      light-dashboard-alist
-      (propertize "\n" 'intangible t)))
-    (keymap-set buffer-map "g" #'light-dashboard-open)
-    (use-local-map buffer-map)
+    (insert (light-dashboard--form-dashboard))
     (goto-char (point-min))
     (text-property-search-forward 'item t)))
 
