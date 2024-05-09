@@ -40,6 +40,34 @@
   :group 'applications
   :prefix "light-dashboard-")
 
+
+;; TODO: use a macro to avoid `eval' and extra `lambda' wrapping
+(defun light-dashboard--normalize-command (command)
+  "Normalize COMMAND."
+  (if (commandp command)
+      command
+    (lambda ()
+      (interactive)
+      (eval command))))
+
+(defun light-dashboard--update-keymap (symbol value)
+  (setq light-dashboard-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (mapc
+	   (lambda (section)
+	     (mapc
+	      (lambda (item)
+		(pcase-let ((`(,_ ,command ,shortcut) item))
+		  (let ((command (light-dashboard--normalize-command command)))
+		    (when shortcut
+		      (keymap-set map shortcut command)))))
+	      (cdr section)))
+	   value)
+	  (keymap-set map "g" #'light-dashboard-open)
+	  (keymap-set map "q" #'quit-window)
+	  map))
+  (set symbol value))
+
 ;; TODO: add setter to update dashboard/keymap on change
 (defcustom light-dashboard-alist
   '(("Org Mode"
@@ -66,7 +94,8 @@ KEY is a string acceptable for `keymap-set'.  If it is specified,
 the SYMBOL-OR-FORM is bound to this key in the dashboard buffer
 keymap."
   :type '(alist :key-type string
-                :value-type (list string (choice function list) string)))
+                :value-type (list string (choice function list) string))
+  :set #'light-dashboard--update-keymap)
 
 (defcustom light-dashboard-right-margin 5
   "Right margin applied after the items column, in number of characters."
@@ -97,15 +126,6 @@ keymap."
     (setq cursor-type nil)
     (cursor-face-highlight-mode 1)))
 
-;; TODO: use a macro to avoid `eval' and extra `lambda' wrapping
-(defun light-dashboard--normalize-command (command)
-  "Normalize COMMAND."
-  (if (commandp command)
-      command
-    (lambda ()
-      (interactive)
-      (eval command))))
-
 ;; TODO: use button.el to avoid manual binding?
 (defun light-dashboard--bind-map (command)
   "Return a new keymap with COMMAND bound to mouse-1 and RET."
@@ -114,8 +134,8 @@ keymap."
     (keymap-set map "RET" command)
     map))
 
-(defun light-dashboard--form-item (column-width buffer-map item)
-  "Format ITEM using COLUMN-WIDTH, bind commands in BUFFER-MAP."
+(defun light-dashboard--form-item (column-width item)
+  "Format ITEM using COLUMN-WIDTH."
   (pcase-let ((`(,desc ,command ,shortcut) item))
     (let ((command (light-dashboard--normalize-command command)))
       (concat
@@ -127,12 +147,11 @@ keymap."
                    'cursor-face 'light-dashboard-selected-face
                    'mouse-face 'light-dashboard-selected-face)
        (when shortcut
-         (keymap-set buffer-map shortcut command)
          (concat (make-string (- column-width (length desc)) ? )
                  (propertize shortcut 'face 'light-dashboard-key)))))))
 
-(defun light-dashboard--form-section (column-width buffer-map section)
-  "Format SECTION using COLUMN-WIDTH, bind commands in BUFFER-MAP."
+(defun light-dashboard--form-section (column-width section)
+  "Format SECTION using COLUMN-WIDTH."
   (pcase-let ((`(,section-name . ,items) section))
     (concat
      (propertize section-name
@@ -141,7 +160,7 @@ keymap."
                  'intangible t
                  'face 'light-dashboard-section)
      (propertize "\n" 'intangible t)
-     (mapconcat (apply-partially #'light-dashboard--form-item column-width buffer-map)
+     (mapconcat (apply-partially #'light-dashboard--form-item column-width)
                 items
                 (propertize "\n" 'intangible t)))))
 
@@ -154,7 +173,7 @@ keymap."
 
 (defun light-dashboard--dashboard-height (alist)
   "Calculate max length of item-names in ALIST."
-  (apply #'+ (mapcar #'length light-dashboard-alist)))
+  (apply #'+ (mapcar #'length alist)))
 
 (defun light-dashboard--top-margin-height (dashboard-height)
   "Calculate top margin height to center dashboard based on DASHBOARD-HEIGHT."
@@ -168,17 +187,12 @@ keymap."
   (let ((column-width (+ (light-dashboard--max-item-length light-dashboard-alist)
                          light-dashboard-right-margin))
 	(dashboard-height (light-dashboard--dashboard-height
-			   light-dashboard-alist))
-        ;; TODO: use the mode keymap
-        (buffer-map (make-sparse-keymap)))
-    (keymap-set buffer-map "g" #'light-dashboard-open)
-    (keymap-set buffer-map "q" #'quit-window)
-    (use-local-map buffer-map)
+			   light-dashboard-alist)))
     (concat (propertize "\n"
                         'line-height (light-dashboard--top-margin-height
 				      dashboard-height))
             (mapconcat
-             (apply-partially #'light-dashboard--form-section column-width buffer-map)
+             (apply-partially #'light-dashboard--form-section column-width)
              light-dashboard-alist
              (propertize "\n" 'intangible t)))))
 
@@ -188,8 +202,8 @@ keymap."
   (interactive)
   (switch-to-buffer light-dashboard-buffer-name)
   (let ((inhibit-read-only t))
-    (unless (derived-mode-p 'light-dashboard-mode)
-      (light-dashboard-mode))
+    ;; update keymap
+    (light-dashboard-mode)
     (erase-buffer)
     (insert (light-dashboard--form-dashboard))
     (goto-char (point-min))
