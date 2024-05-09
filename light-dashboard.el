@@ -65,7 +65,7 @@ KEY is a string acceptable for `keymap-set'.  If it is specified,
 the SYMBOL-OR-FORM is bound to this key in the dashboard buffer
 keymap."
   :type '(alist :key-type string
-		        :value-type (list string (choice function list) string)))
+                :value-type (list string (choice function list) string)))
 
 (defcustom light-dashboard-right-margin 5
   "Right margin applied after the items column, in number of characters."
@@ -126,16 +126,16 @@ keymap."
     (let ((command (light-dashboard--normalize-command command)))
       (concat
        (propertize desc
-	               'item t
-	               'keymap (light-dashboard--bind-map command)
-	               'line-prefix
-	               `(space . (:align-to (- center ,(/ column-width 2))))
-	               'cursor-face 'light-dashboard-selected-face
-	               'mouse-face 'light-dashboard-selected-face)
-	   (when shortcut
-	     (keymap-set buffer-map shortcut command)
-	     (concat (make-string (- column-width (length desc)) ? )
-	             (propertize shortcut 'face 'light-dashboard-key)))))))
+                   'item t
+                   'keymap (light-dashboard--bind-map command)
+                   'line-prefix
+                   `(space . (:align-to (- center ,(/ column-width 2))))
+                   'cursor-face 'light-dashboard-selected-face
+                   'mouse-face 'light-dashboard-selected-face)
+       (when shortcut
+         (keymap-set buffer-map shortcut command)
+         (concat (make-string (- column-width (length desc)) ? )
+                 (propertize shortcut 'face 'light-dashboard-key)))))))
 
 (defun light-dashboard--form-section (column-width buffer-map section)
   "Format SECTION using COLUMN-WIDTH, bind commands in BUFFER-MAP."
@@ -161,12 +161,12 @@ keymap."
   (let ((column-width (+ (light-dashboard--max-item-length light-dashboard-alist)
                          light-dashboard-right-margin))
         ;; TODO: use the mode keymap
-	    (buffer-map (make-sparse-keymap)))
+        (buffer-map (make-sparse-keymap)))
     (keymap-set buffer-map "g" #'light-dashboard-open)
     (keymap-set buffer-map "q" #'quit-window)
     (use-local-map buffer-map)
     (concat (propertize "\n"
-		                'line-height (light-dashboard--top-margin-height))
+                        'line-height (light-dashboard--top-margin-height))
             (mapconcat
              (apply-partially #'light-dashboard--form-section column-width buffer-map)
              light-dashboard-alist
