@@ -152,22 +152,31 @@ keymap."
 	       (seq-map (lambda (x) (length (car x))))
 	       (seq-max)))
 
-(defun light-dashboard--top-margin-height ()
-  "Calculate top margin height to center dashboard properly."
-  (* (line-pixel-height)
-     (1- (/ (window-height) 2))))
+(defun light-dashboard--dashboard-height (alist)
+  "Calculate max length of item-names in ALIST."
+  (apply #'+ (mapcar #'length light-dashboard-alist)))
+
+(defun light-dashboard--top-margin-height (dashboard-height)
+  "Calculate top margin height to center dashboard based on DASHBOARD-HEIGHT."
+  (max
+   (* (line-pixel-height)
+      (/ (- (window-height) dashboard-height) 2))
+   (line-pixel-height)))
 
 (defun light-dashboard--form-dashboard ()
   "Format `light-dashboard-alist'."
   (let ((column-width (+ (light-dashboard--max-item-length light-dashboard-alist)
                          light-dashboard-right-margin))
+	(dashboard-height (light-dashboard--dashboard-height
+			   light-dashboard-alist))
         ;; TODO: use the mode keymap
         (buffer-map (make-sparse-keymap)))
     (keymap-set buffer-map "g" #'light-dashboard-open)
     (keymap-set buffer-map "q" #'quit-window)
     (use-local-map buffer-map)
     (concat (propertize "\n"
-                        'line-height (light-dashboard--top-margin-height))
+                        'line-height (light-dashboard--top-margin-height
+				      dashboard-height))
             (mapconcat
              (apply-partially #'light-dashboard--form-section column-width buffer-map)
              light-dashboard-alist
