@@ -34,3 +34,5 @@ A simple dashboard package that may be used as a startup screen in Emacs.
 ``` 
 M-x light-dashboard-open
 ```
+
+Thanks to @a13 and @progfolio for code review.
