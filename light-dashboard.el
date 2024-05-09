@@ -148,9 +148,9 @@ keymap."
 (defun light-dashboard--max-item-length (alist)
   "Calculate max length of item-names in ALIST."
   (thread-last alist
-    (seq-mapcat #'cdr)
-    (seq-map (lambda (x) (length (car x))))
-    (seq-max)))
+	       (seq-mapcat #'cdr)
+	       (seq-map (lambda (x) (length (car x))))
+	       (seq-max)))
 
 (defun light-dashboard--top-margin-height ()
   "Calculate top margin height to center dashboard properly."
