@@ -40,6 +40,7 @@
   :group 'applications
   :prefix "light-dashboard-")
 
+;; TODO: add setter to update dashboard/keymap on change
 (defcustom light-dashboard-alist
   '(("Org Mode"
      ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
