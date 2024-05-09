@@ -96,13 +96,6 @@ keymap."
     (setq cursor-type nil)
     (cursor-face-highlight-mode 1)))
 
-(defun light-dashboard--max-item-length (alist)
-  "Calculate max length of item-names in ALIST."
-  (thread-last alist
-    (seq-mapcat #'cdr)
-    (seq-map (lambda (x) (length (car x))))
-    (seq-max)))
-
 ;; TODO: use a macro to avoid `eval' and extra `lambda' wrapping
 (defun light-dashboard--normalize-command (command)
   "Normalize COMMAND."
@@ -150,6 +143,13 @@ keymap."
      (mapconcat (apply-partially #'light-dashboard--form-item column-width buffer-map)
                 items
                 (propertize "\n" 'intangible t)))))
+
+(defun light-dashboard--max-item-length (alist)
+  "Calculate max length of item-names in ALIST."
+  (thread-last alist
+    (seq-mapcat #'cdr)
+    (seq-map (lambda (x) (length (car x))))
+    (seq-max)))
 
 (defun light-dashboard--top-margin-height ()
   "Calculate top margin height to center dashboard properly."
