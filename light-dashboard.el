@@ -40,6 +40,7 @@
   :group 'applications
   :prefix "light-dashboard-")
 
+(defvar-keymap light-dashboard-mode-map)
 
 ;; TODO: use a macro to avoid `eval' and extra `lambda' wrapping
 (defun light-dashboard--normalize-command (command)
@@ -51,6 +52,7 @@
       (eval command))))
 
 (defun light-dashboard--update-keymap (symbol value)
+  "Set SYMBOL's value to VALUE, updating `light-dashboard-mode-map'."
   (setq light-dashboard-mode-map
 	(let ((map (make-sparse-keymap)))
 	  (mapc
