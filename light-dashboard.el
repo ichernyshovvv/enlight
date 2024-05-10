@@ -136,35 +136,33 @@ keymap."
     (keymap-set map "RET" command)
     map))
 
-(defun light-dashboard--form-item (column-width item)
-  "Format ITEM using COLUMN-WIDTH."
-  (pcase-let ((`(,desc ,command ,shortcut) item))
-    (let ((command (light-dashboard--normalize-command command)))
-      (concat
-       (propertize desc
-                   'item t
-                   'keymap (light-dashboard--bind-map command)
-                   'line-prefix
-                   `(space . (:align-to (- center ,(/ column-width 2))))
-                   'cursor-face 'light-dashboard-selected-face
-                   'mouse-face 'light-dashboard-selected-face)
-       (when shortcut
-         (concat (make-string (- column-width (length desc)) ? )
-                 (propertize shortcut 'face 'light-dashboard-key)))))))
-
-(defun light-dashboard--form-section (column-width section)
+(defun light-dashboard--insert-section (column-width section)
   "Format SECTION using COLUMN-WIDTH."
   (pcase-let ((`(,section-name . ,items) section))
-    (concat
+    (insert
      (propertize section-name
                  'line-prefix
                  `(space . (:align-to (- center ,(/ (length section-name) 2))))
                  'intangible t
                  'face 'light-dashboard-section)
-     (propertize "\n" 'intangible t)
-     (mapconcat (apply-partially #'light-dashboard--form-item column-width)
-                items
-                (propertize "\n" 'intangible t)))))
+     (propertize "\n" 'intangible t))
+    (mapc (apply-partially #'light-dashboard--insert-item column-width) items)))
+
+(defun light-dashboard--insert-item (column-width item)
+  (pcase-let ((`(,desc ,command ,shortcut) item))
+    (insert-text-button
+     desc
+     'face 'default
+     'action (light-dashboard--normalize-command command)
+     'line-prefix
+     `(space . (:align-to (- center ,(/ column-width 2))))
+     'cursor-face 'light-dashboard-selected-face
+     'mouse-face 'light-dashboard-selected-face)
+    (when shortcut
+      (insert
+       (concat (make-string (- column-width (length desc)) ? )
+	       (propertize shortcut 'face 'light-dashboard-key))))
+    (insert (propertize "\n" 'intangible t))))
 
 (defun light-dashboard--max-item-length (alist)
   "Calculate max length of item-names in ALIST."
@@ -190,13 +188,13 @@ keymap."
                          light-dashboard-right-margin))
 	(dashboard-height (light-dashboard--dashboard-height
 			   light-dashboard-alist)))
-    (concat (propertize "\n"
-                        'line-height (light-dashboard--top-margin-height
-				      dashboard-height))
-            (mapconcat
-             (apply-partially #'light-dashboard--form-section column-width)
-             light-dashboard-alist
-             (propertize "\n" 'intangible t)))))
+    (insert
+     (propertize "\n"
+                 'line-height (light-dashboard--top-margin-height
+			       dashboard-height)))
+    (mapc
+     (apply-partially #'light-dashboard--insert-section column-width)
+     light-dashboard-alist)))
 
 ;;;###autoload
 (defun light-dashboard-open ()
@@ -207,9 +205,9 @@ keymap."
     ;; update keymap
     (light-dashboard-mode)
     (erase-buffer)
-    (insert (light-dashboard--form-dashboard))
+    (light-dashboard--form-dashboard)
     (goto-char (point-min))
-    (text-property-search-forward 'item t)))
+    (text-property-search-forward 'button '(t))))
 
 (provide 'light-dashboard)
 
