@@ -128,16 +128,8 @@ keymap."
     (setq cursor-type nil)
     (cursor-face-highlight-mode 1)))
 
-;; TODO: use button.el to avoid manual binding?
-(defun light-dashboard--bind-map (command)
-  "Return a new keymap with COMMAND bound to mouse-1 and RET."
-  (let ((map (make-sparse-keymap)))
-    (keymap-set map "<mouse-1>" command)
-    (keymap-set map "RET" command)
-    map))
-
 (defun light-dashboard--insert-section (column-width section)
-  "Format SECTION using COLUMN-WIDTH."
+  "Insert SECTION using COLUMN-WIDTH."
   (pcase-let ((`(,section-name . ,items) section))
     (insert
      (propertize section-name
@@ -149,6 +141,7 @@ keymap."
     (mapc (apply-partially #'light-dashboard--insert-item column-width) items)))
 
 (defun light-dashboard--insert-item (column-width item)
+  "Insert ITEM using COLUMN-WIDTH."
   (pcase-let ((`(,desc ,command ,shortcut) item))
     (insert-text-button
      desc
@@ -182,8 +175,8 @@ keymap."
       (/ (- (window-height) dashboard-height) 2))
    (line-pixel-height)))
 
-(defun light-dashboard--form-dashboard ()
-  "Format `light-dashboard-alist'."
+(defun light-dashboard--insert-dashboard ()
+  "Format `light-dashboard-alist' and insert the result."
   (let ((column-width (+ (light-dashboard--max-item-length light-dashboard-alist)
                          light-dashboard-right-margin))
 	(dashboard-height (light-dashboard--dashboard-height
@@ -205,7 +198,7 @@ keymap."
     ;; update keymap
     (light-dashboard-mode)
     (erase-buffer)
-    (light-dashboard--form-dashboard)
+    (light-dashboard--insert-dashboard)
     (goto-char (point-min))
     (text-property-search-forward 'button '(t))))
 
