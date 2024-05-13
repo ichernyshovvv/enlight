@@ -42,14 +42,14 @@
 
 (defvar-keymap light-dashboard-mode-map)
 
-;; TODO: use a macro to avoid `eval' and extra `lambda' wrapping
 (defun light-dashboard--normalize-command (command)
   "Normalize COMMAND."
-  (if (commandp command)
-      command
-    (lambda ()
-      (interactive)
-      (eval command))))
+  (declare (indent 1))
+  `(lambda (&optional button)
+     (interactive)
+     ,(if (commandp command)
+	  `(call-interactively ',command)
+	command)))
 
 (defun light-dashboard--update-keymap (symbol value)
   "Set SYMBOL's value to VALUE, updating `light-dashboard-mode-map'."
