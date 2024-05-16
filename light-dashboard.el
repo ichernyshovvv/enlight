@@ -29,7 +29,6 @@
 
 ;;; Code:
 
-(require 'text-property-search)
 (require 'subr-x)
 (require 'seq)
 
@@ -67,8 +66,8 @@
 	   value)
 	  (keymap-set map "g" #'light-dashboard-open)
 	  (keymap-set map "q" #'quit-window)
-	  (keymap-set map "<remap> <next-line>" 'light-dashboard-next-line)
-	  (keymap-set map "<remap> <previous-line>" 'light-dashboard-previous-line)
+	  (keymap-set map "<remap> <next-line>" 'forward-button)
+	  (keymap-set map "<remap> <previous-line>" 'backward-button)
 	  map))
   (set symbol value))
 
@@ -149,6 +148,7 @@ keymap."
      'action (light-dashboard--normalize-command command)
      'line-prefix
      `(space . (:align-to (- center ,(/ column-width 2))))
+     'help-echo nil
      'cursor-face 'light-dashboard-selected-face
      'mouse-face 'light-dashboard-selected-face)
     (when shortcut
@@ -200,23 +200,7 @@ keymap."
     (erase-buffer)
     (light-dashboard--insert-dashboard)
     (goto-char (point-min))
-    (text-property-search-forward 'button '(t))))
-
-(defun light-dashboard-next-line ()
-  (interactive)
-  (or (progn
-	(text-property-search-forward 'button '(t))
-	(get-text-property (point) 'button))
-      (progn
-	(goto-char (point-min))
-	(light-dashboard-next-line))))
-
-(defun light-dashboard-previous-line ()
-  (interactive)
-  (or (text-property-search-backward 'button)
-      (progn
-	(goto-char (point-max))
-	(light-dashboard-previous-line))))
+    (forward-button 1)))
 
 (provide 'light-dashboard)
 
