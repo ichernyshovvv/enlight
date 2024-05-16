@@ -170,10 +170,7 @@ keymap."
 
 (defun light-dashboard--top-margin-height (dashboard-height)
   "Calculate top margin height to center dashboard based on DASHBOARD-HEIGHT."
-  (max
-   (* (line-pixel-height)
-      (/ (- (window-height) dashboard-height) 2))
-   (line-pixel-height)))
+  (max (/ (- (window-height) dashboard-height) 2) 1))
 
 (defun light-dashboard--insert-dashboard ()
   "Format `light-dashboard-alist' and insert the result."
@@ -181,10 +178,7 @@ keymap."
                          light-dashboard-right-margin))
 	(dashboard-height (light-dashboard--dashboard-height
 			   light-dashboard-alist)))
-    (insert
-     (propertize "\n"
-                 'line-height (light-dashboard--top-margin-height
-			       dashboard-height)))
+    (insert-char ?\n (light-dashboard--top-margin-height dashboard-height))
     (mapc
      (apply-partially #'light-dashboard--insert-section column-width)
      light-dashboard-alist)))
