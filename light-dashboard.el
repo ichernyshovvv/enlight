@@ -67,6 +67,8 @@
 	   value)
 	  (keymap-set map "g" #'light-dashboard-open)
 	  (keymap-set map "q" #'quit-window)
+	  (keymap-set map "<remap> <next-line>" 'light-dashboard-next-line)
+	  (keymap-set map "<remap> <previous-line>" 'light-dashboard-previous-line)
 	  map))
   (set symbol value))
 
@@ -123,7 +125,6 @@ keymap."
 
 (define-derived-mode light-dashboard-mode
   special-mode "Light Dashboard"
-  (setq goal-column 0)
   (when (fboundp #'cursor-face-highlight-mode)
     (setq cursor-type nil)
     (cursor-face-highlight-mode 1)))
@@ -135,9 +136,8 @@ keymap."
      (propertize section-name
                  'line-prefix
                  `(space . (:align-to (- center ,(/ (length section-name) 2))))
-                 'intangible t
                  'face 'light-dashboard-section)
-     (propertize "\n" 'intangible t))
+     "\n")
     (mapc (apply-partially #'light-dashboard--insert-item column-width) items)))
 
 (defun light-dashboard--insert-item (column-width item)
@@ -155,7 +155,7 @@ keymap."
       (insert
        (concat (make-string (- column-width (length desc)) ? )
 	       (propertize shortcut 'face 'light-dashboard-key))))
-    (insert (propertize "\n" 'intangible t))))
+    (insert "\n")))
 
 (defun light-dashboard--max-item-length (alist)
   "Calculate max length of item-names in ALIST."
@@ -201,6 +201,22 @@ keymap."
     (light-dashboard--insert-dashboard)
     (goto-char (point-min))
     (text-property-search-forward 'button '(t))))
+
+(defun light-dashboard-next-line ()
+  (interactive)
+  (or (progn
+	(text-property-search-forward 'button '(t))
+	(get-text-property (point) 'button))
+      (progn
+	(goto-char (point-min))
+	(light-dashboard-next-line))))
+
+(defun light-dashboard-previous-line ()
+  (interactive)
+  (or (text-property-search-backward 'button)
+      (progn
+	(goto-char (point-max))
+	(light-dashboard-previous-line))))
 
 (provide 'light-dashboard)
 
