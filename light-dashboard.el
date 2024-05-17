@@ -183,7 +183,7 @@ keymap."
     (setq cursor-type nil)
     (cursor-face-highlight-mode 1)))
 
-(defun light-dashboard--top-margin-height (dashboard-height)
+(defun light-dashboard--top-margin (dashboard-height)
   "Calculate top margin height to center dashboard based on DASHBOARD-HEIGHT."
   (max (/ (- (window-height) dashboard-height) 2) 0))
 
@@ -195,7 +195,7 @@ keymap."
   (let ((inhibit-read-only t))
     (light-dashboard-mode)
     (erase-buffer)
-    (insert-char ?\n (light-dashboard--top-margin-height light-dashboard-height))
+    (insert-char ?\n (light-dashboard--top-margin light-dashboard-height))
     (insert light-dashboard-dashboard-string)
     (goto-char (point-min))
     (forward-button 1)))
