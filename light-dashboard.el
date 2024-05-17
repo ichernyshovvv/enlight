@@ -63,7 +63,7 @@
   :type 'integer)
 
 (defun light-dashboard--insert-section (section)
-  "Insert SECTION using COLUMN-WIDTH."
+  "Insert SECTION in the current buffer."
   (pcase-let ((`(,section-name . ,items) section))
     (insert
      (propertize section-name
@@ -74,7 +74,7 @@
     (mapc #'light-dashboard--insert-item items)))
 
 (defun light-dashboard--insert-item (item)
-  "Insert ITEM using COLUMN-WIDTH."
+  "Insert ITEM in the current buffer."
   (pcase-let ((`(,desc ,command ,shortcut) item))
     (insert-text-button
      desc
