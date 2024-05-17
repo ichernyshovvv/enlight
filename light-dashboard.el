@@ -125,7 +125,9 @@ Also update `light-dashboard-mode-map', `light-dashboard-dashboard-string',
      (keymap-set map "g" #'light-dashboard-open)
      (keymap-set map "q" #'quit-window)
      (keymap-set map "<remap> <next-line>" 'forward-button)
+     (keymap-set map "<remap> <right-char>" 'forward-button)
      (keymap-set map "<remap> <previous-line>" 'backward-button)
+     (keymap-set map "<remap> <left-char>" 'backward-button)
      map)
    light-dashboard-dashboard-string
    (light-dashboard--generate-dashboard value)
