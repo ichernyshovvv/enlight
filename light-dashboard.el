@@ -106,8 +106,8 @@
      (lambda (section)
        (mapc
 	(pcase-lambda (`(,_ ,command ,shortcut))
-	  (let ((command (light-dashboard--normalize-command command)))
-	    (when shortcut
+	  (when shortcut
+	    (let ((command (light-dashboard--normalize-command command)))
 	      (keymap-set map shortcut command))))
 	(cdr section)))
      alist)
