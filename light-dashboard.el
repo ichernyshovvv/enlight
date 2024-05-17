@@ -99,37 +99,35 @@
   "Calculate max length of item-names in ALIST."
   (apply #'+ (mapcar #'length alist)))
 
+(defun light-dashboard--generate-map (alist)
+  "Generate the keymap for `light-dashboard-mode' from ALIST."
+  (let ((map (make-sparse-keymap)))
+    (mapc
+     (lambda (section)
+       (mapc
+	(pcase-lambda (`(,_ ,command ,shortcut))
+	  (let ((command (light-dashboard--normalize-command command)))
+	    (when shortcut
+	      (keymap-set map shortcut command))))
+	(cdr section)))
+     alist)
+    (keymap-set map "g" #'light-dashboard-open)
+    (keymap-set map "q" #'quit-window)
+    (keymap-set map "<remap> <next-line>" 'forward-button)
+    (keymap-set map "<remap> <right-char>" 'forward-button)
+    (keymap-set map "<remap> <previous-line>" 'backward-button)
+    (keymap-set map "<remap> <left-char>" 'backward-button)
+    map))
+
 (defun light-dashboard--update (symbol value)
   "Set SYMBOL's value to VALUE.
 Also update `light-dashboard-mode-map', `light-dashboard-dashboard-string',
-`light-dashboard-height'."
-  (setq
-   light-dashboard-mode-map
-   (let ((map (make-sparse-keymap)))
-     (mapc
-      (lambda (section)
-	(mapc
-	 (lambda (item)
-	   (pcase-let ((`(,_ ,command ,shortcut) item))
-	     (let ((command (light-dashboard--normalize-command command)))
-	       (when shortcut
-		 (keymap-set map shortcut command)))))
-	 (cdr section)))
-      value)
-     (keymap-set map "g" #'light-dashboard-open)
-     (keymap-set map "q" #'quit-window)
-     (keymap-set map "<remap> <next-line>" 'forward-button)
-     (keymap-set map "<remap> <right-char>" 'forward-button)
-     (keymap-set map "<remap> <previous-line>" 'backward-button)
-     (keymap-set map "<remap> <left-char>" 'backward-button)
-     map)
-   light-dashboard-width
-   (+ (light-dashboard--max-item-length value)
-      light-dashboard-right-margin)
-   light-dashboard-height
-   (light-dashboard--dashboard-height value)
-   light-dashboard-dashboard-string
-   (light-dashboard--generate-dashboard value))
+`light-dashboard-height', `light-dashboard-width'."
+  (setq light-dashboard-mode-map (light-dashboard--generate-map value)
+	light-dashboard-width (+ (light-dashboard--max-item-length value)
+				 light-dashboard-right-margin)
+	light-dashboard-height (light-dashboard--dashboard-height value)
+	light-dashboard-dashboard-string (light-dashboard--generate-dashboard value))
   (set symbol value))
 
 (defcustom light-dashboard-alist
