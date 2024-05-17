@@ -32,14 +32,10 @@
 (require 'subr-x)
 (require 'seq)
 
-;;;; Defcustoms
-
 (defgroup light-dashboard nil
   "Simple dashboard."
   :group 'applications
   :prefix "light-dashboard-")
-
-(defvar-keymap light-dashboard-mode-map)
 
 (defun light-dashboard--normalize-command (command)
   "Normalize COMMAND."
@@ -50,83 +46,21 @@
 	  `(call-interactively ',command)
 	command)))
 
-(defun light-dashboard--update-keymap (symbol value)
-  "Set SYMBOL's value to VALUE, updating `light-dashboard-mode-map'."
-  (setq light-dashboard-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (mapc
-	   (lambda (section)
-	     (mapc
-	      (lambda (item)
-		(pcase-let ((`(,_ ,command ,shortcut) item))
-		  (let ((command (light-dashboard--normalize-command command)))
-		    (when shortcut
-		      (keymap-set map shortcut command)))))
-	      (cdr section)))
-	   value)
-	  (keymap-set map "g" #'light-dashboard-open)
-	  (keymap-set map "q" #'quit-window)
-	  (keymap-set map "<remap> <next-line>" 'forward-button)
-	  (keymap-set map "<remap> <previous-line>" 'backward-button)
-	  map))
-  (set symbol value))
+(defvar-keymap light-dashboard-mode-map)
+(defvar light-dashboard-dashboard-string nil)
+(defvar light-dashboard-height nil)
+(defvar light-dashboard-buffer-name "*light-dashboard*")
 
-;; TODO: add setter to update dashboard/keymap on change
-(defcustom light-dashboard-alist
-  '(("Org Mode"
-     ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
-    ("Other"
-     ("Projects" project-switch-project "p")))
-  "List of items and sections in the dashboard.
-
-The value of this variable is an alist of the form:
-
-  ((\"Section-1\" ITEM ITEM ...)
-   (\"Section-2\" ITEM ITEM ...)
-   ...)
-
-Where ITEM is of the form:
-
-  (\"Item text\" SYMBOL-OR-FORM [KEY])
-
-SYMBOL-OR-FORM is a form or a function symbol.  If it's a
-function symbol, the function will be called when a user presses
-RET or clicks on that item.
-
-KEY is a string acceptable for `keymap-set'.  If it is specified,
-the SYMBOL-OR-FORM is bound to this key in the dashboard buffer
-keymap."
-  :type '(alist :key-type string
-                :value-type (list string (choice function list) string))
-  :set #'light-dashboard--update-keymap)
+(defun light-dashboard--max-item-length (alist)
+  "Calculate max length of item-names in ALIST."
+  (thread-last alist
+	       (seq-mapcat #'cdr)
+	       (seq-map (lambda (x) (length (car x))))
+	       (seq-max)))
 
 (defcustom light-dashboard-right-margin 5
   "Right margin applied after the items column, in number of characters."
   :type 'integer)
-
-;;;; Faces
-
-(defface light-dashboard-selected-face
-  '((t (:underline t)))
-  "Face used for currently selected item.")
-
-(defface light-dashboard-section
-  '((t (:inherit font-lock-keyword-face)))
-  "Face used for sections.")
-
-(defface light-dashboard-key
-  '((t (:inherit font-lock-constant-face)))
-  "Face used for key strings.")
-
-;;; Vars and functions
-
-(defvar light-dashboard-buffer-name "*light-dashboard*")
-
-(define-derived-mode light-dashboard-mode
-  special-mode "Light Dashboard"
-  (when (fboundp #'cursor-face-highlight-mode)
-    (setq cursor-type nil)
-    (cursor-face-highlight-mode 1)))
 
 (defun light-dashboard--insert-section (column-width section)
   "Insert SECTION using COLUMN-WIDTH."
@@ -157,31 +91,101 @@ keymap."
 	       (propertize shortcut 'face 'light-dashboard-key))))
     (insert "\n")))
 
-(defun light-dashboard--max-item-length (alist)
-  "Calculate max length of item-names in ALIST."
-  (thread-last alist
-	       (seq-mapcat #'cdr)
-	       (seq-map (lambda (x) (length (car x))))
-	       (seq-max)))
+(defun light-dashboard--generate-dashboard (alist)
+  "Generate the dashboard using ALIST and return as a string."
+  (with-temp-buffer
+    (let ((column-width (+ (light-dashboard--max-item-length alist)
+                           light-dashboard-right-margin)))
+      (mapc
+       (apply-partially #'light-dashboard--insert-section column-width)
+       alist))
+    (buffer-substring (point-min) (point-max))))
 
 (defun light-dashboard--dashboard-height (alist)
   "Calculate max length of item-names in ALIST."
   (apply #'+ (mapcar #'length alist)))
 
+(defun light-dashboard--update (symbol value)
+  "Set SYMBOL's value to VALUE.
+Also update `light-dashboard-mode-map', `light-dashboard-dashboard-string',
+`light-dashboard-height'."
+  (setq
+   light-dashboard-mode-map
+   (let ((map (make-sparse-keymap)))
+     (mapc
+      (lambda (section)
+	(mapc
+	 (lambda (item)
+	   (pcase-let ((`(,_ ,command ,shortcut) item))
+	     (let ((command (light-dashboard--normalize-command command)))
+	       (when shortcut
+		 (keymap-set map shortcut command)))))
+	 (cdr section)))
+      value)
+     (keymap-set map "g" #'light-dashboard-open)
+     (keymap-set map "q" #'quit-window)
+     (keymap-set map "<remap> <next-line>" 'forward-button)
+     (keymap-set map "<remap> <previous-line>" 'backward-button)
+     map)
+   light-dashboard-dashboard-string
+   (light-dashboard--generate-dashboard value)
+   light-dashboard-height
+   (light-dashboard--dashboard-height value))
+  (set symbol value))
+
+(defcustom light-dashboard-alist
+  '(("Org Mode"
+     ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
+    ("Other"
+     ("Projects" project-switch-project "p")))
+  "List of items and sections in the dashboard.
+
+The value of this variable is an alist of the form:
+
+  ((\"Section-1\" ITEM ITEM ...)
+   (\"Section-2\" ITEM ITEM ...)
+   ...)
+
+Where ITEM is of the form:
+
+  (\"Item text\" SYMBOL-OR-FORM [KEY])
+
+SYMBOL-OR-FORM is a form or a function symbol.  If it's a
+function symbol, the function will be called when a user presses
+RET or clicks on that item.
+
+KEY is a string acceptable for `keymap-set'.  If it is specified,
+the SYMBOL-OR-FORM is bound to this key in the dashboard buffer
+keymap."
+  :type '(alist :key-type string
+                :value-type (list string (choice function list) string))
+  :set #'light-dashboard--update)
+
+;;;; Faces
+
+(defface light-dashboard-selected-face
+  '((t (:underline t)))
+  "Face used for currently selected item.")
+
+(defface light-dashboard-section
+  '((t (:inherit font-lock-keyword-face)))
+  "Face used for sections.")
+
+(defface light-dashboard-key
+  '((t (:inherit font-lock-constant-face)))
+  "Face used for key strings.")
+
+;;; Vars and functions
+
+(define-derived-mode light-dashboard-mode
+  special-mode "Light Dashboard"
+  (when (fboundp #'cursor-face-highlight-mode)
+    (setq cursor-type nil)
+    (cursor-face-highlight-mode 1)))
+
 (defun light-dashboard--top-margin-height (dashboard-height)
   "Calculate top margin height to center dashboard based on DASHBOARD-HEIGHT."
-  (max (/ (- (window-height) dashboard-height) 2) 1))
-
-(defun light-dashboard--insert-dashboard ()
-  "Format `light-dashboard-alist' and insert the result."
-  (let ((column-width (+ (light-dashboard--max-item-length light-dashboard-alist)
-                         light-dashboard-right-margin))
-	(dashboard-height (light-dashboard--dashboard-height
-			   light-dashboard-alist)))
-    (insert-char ?\n (light-dashboard--top-margin-height dashboard-height))
-    (mapc
-     (apply-partially #'light-dashboard--insert-section column-width)
-     light-dashboard-alist)))
+  (max (/ (- (window-height) dashboard-height) 2) 0))
 
 ;;;###autoload
 (defun light-dashboard-open ()
@@ -189,10 +193,10 @@ keymap."
   (interactive)
   (switch-to-buffer light-dashboard-buffer-name)
   (let ((inhibit-read-only t))
-    ;; update keymap
     (light-dashboard-mode)
     (erase-buffer)
-    (light-dashboard--insert-dashboard)
+    (insert-char ?\n (light-dashboard--top-margin-height light-dashboard-height))
+    (insert light-dashboard-dashboard-string)
     (goto-char (point-min))
     (forward-button 1)))
 
