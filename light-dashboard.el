@@ -39,7 +39,6 @@
 
 (defun light-dashboard--normalize-command (command)
   "Normalize COMMAND."
-  (declare (indent 1))
   `(lambda (&optional button)
      (interactive)
      ,(if (commandp command)
@@ -49,6 +48,7 @@
 (defvar-keymap light-dashboard-mode-map)
 (defvar light-dashboard-dashboard-string nil)
 (defvar light-dashboard-height nil)
+(defvar light-dashboard-width nil)
 (defvar light-dashboard-buffer-name "*light-dashboard*")
 
 (defun light-dashboard--max-item-length (alist)
@@ -62,7 +62,7 @@
   "Right margin applied after the items column, in number of characters."
   :type 'integer)
 
-(defun light-dashboard--insert-section (column-width section)
+(defun light-dashboard--insert-section (section)
   "Insert SECTION using COLUMN-WIDTH."
   (pcase-let ((`(,section-name . ,items) section))
     (insert
@@ -71,34 +71,28 @@
                  `(space . (:align-to (- center ,(/ (length section-name) 2))))
                  'face 'light-dashboard-section)
      "\n")
-    (mapc (apply-partially #'light-dashboard--insert-item column-width) items)))
+    (mapc #'light-dashboard--insert-item items)))
 
-(defun light-dashboard--insert-item (column-width item)
+(defun light-dashboard--insert-item (item)
   "Insert ITEM using COLUMN-WIDTH."
   (pcase-let ((`(,desc ,command ,shortcut) item))
     (insert-text-button
      desc
      'face 'default
      'action (light-dashboard--normalize-command command)
-     'line-prefix
-     `(space . (:align-to (- center ,(/ column-width 2))))
      'help-echo nil
      'cursor-face 'light-dashboard-selected-face
      'mouse-face 'light-dashboard-selected-face)
     (when shortcut
       (insert
-       (concat (make-string (- column-width (length desc)) ? )
+       (concat (make-string (- light-dashboard-width (length desc)) ? )
 	       (propertize shortcut 'face 'light-dashboard-key))))
     (insert "\n")))
 
 (defun light-dashboard--generate-dashboard (alist)
   "Generate the dashboard using ALIST and return as a string."
   (with-temp-buffer
-    (let ((column-width (+ (light-dashboard--max-item-length alist)
-                           light-dashboard-right-margin)))
-      (mapc
-       (apply-partially #'light-dashboard--insert-section column-width)
-       alist))
+    (mapc #'light-dashboard--insert-section alist)
     (buffer-substring (point-min) (point-max))))
 
 (defun light-dashboard--dashboard-height (alist)
@@ -129,10 +123,13 @@ Also update `light-dashboard-mode-map', `light-dashboard-dashboard-string',
      (keymap-set map "<remap> <previous-line>" 'backward-button)
      (keymap-set map "<remap> <left-char>" 'backward-button)
      map)
-   light-dashboard-dashboard-string
-   (light-dashboard--generate-dashboard value)
+   light-dashboard-width
+   (+ (light-dashboard--max-item-length value)
+      light-dashboard-right-margin)
    light-dashboard-height
-   (light-dashboard--dashboard-height value))
+   (light-dashboard--dashboard-height value)
+   light-dashboard-dashboard-string
+   (light-dashboard--generate-dashboard value))
   (set symbol value))
 
 (defcustom light-dashboard-alist
@@ -198,6 +195,8 @@ keymap."
     (light-dashboard-mode)
     (erase-buffer)
     (insert-char ?\n (light-dashboard--top-margin light-dashboard-height))
+    (setq line-prefix
+	  `(space . (:align-to (- center ,(/ light-dashboard-width 2)))))
     (insert light-dashboard-dashboard-string)
     (goto-char (point-min))
     (forward-button 1)))
