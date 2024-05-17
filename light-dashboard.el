@@ -3,7 +3,7 @@
 ;; Copyright (C) 2024  Ilya Chernyshov
 
 ;; Author: Ilya Chernyshov <ichernyshovvv@gmail.com>
-;; Version: 0.1-pre
+;; Version: 0.1
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: startup, screen, tools, dashboard
 ;; URL: https://github.com/ichernyshovvv/light-dashboard
