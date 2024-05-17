@@ -93,7 +93,7 @@
   "Generate the dashboard using ALIST and return as a string."
   (with-temp-buffer
     (mapc #'light-dashboard--insert-section alist)
-    (buffer-substring (point-min) (point-max))))
+    (buffer-string)))
 
 (defun light-dashboard--dashboard-height (alist)
   "Calculate max length of item-names in ALIST."
