@@ -26,9 +26,7 @@ A simple dashboard package that may be used as a startup screen in Emacs.
      ("Downloads" ("Transmission" transmission "t"))
      ("Current Projects"
       ("org-timeblock" (dired "~/.my-emacs-packages.d/active/org-timeblock/") "o")
-      ("chloe" (dired "~/.my-emacs-packages.d/active/chloe/") "x"))))
-  :config
-  (light-dashboard-open))
+      ("chloe" (dired "~/.my-emacs-packages.d/active/chloe/") "x")))))
 ```
 
 ## Usage
