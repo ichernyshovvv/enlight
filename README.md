@@ -31,6 +31,15 @@ A simple dashboard package that may be used as a startup screen in Emacs.
 
 ## Usage
 
+You can set `initial-buffer-choice` custom variable to #'light-dashboard in
+order to show light-dashboard right after Emacs startup:
+
+```
+(setopt initial-buffer-choice #'light-dashboard)
+```
+
+Also you always can switch to the dashboard by calling
+
 ``` 
 M-x light-dashboard-open
 ```
