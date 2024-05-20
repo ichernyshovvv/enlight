@@ -185,19 +185,25 @@ keymap."
   (max (/ (- (window-height) dashboard-height) 2) 0))
 
 ;;;###autoload
+(defun light-dashboard ()
+  "Return `light-dashboard' buffer ready for display."
+  (with-current-buffer (get-buffer-create light-dashboard-buffer-name)
+    (let ((inhibit-read-only t))
+      (light-dashboard-mode)
+      (erase-buffer)
+      (insert-char ?\n (light-dashboard--top-margin light-dashboard-height))
+      (setq line-prefix
+	    `(space . (:align-to (- center ,(/ light-dashboard-width 2)))))
+      (insert light-dashboard-dashboard-string)
+      (goto-char (point-min))
+      (forward-button 1))
+    (current-buffer)))
+
+;;;###autoload
 (defun light-dashboard-open ()
   "Open `light-dashboard'."
   (interactive)
-  (switch-to-buffer light-dashboard-buffer-name)
-  (let ((inhibit-read-only t))
-    (light-dashboard-mode)
-    (erase-buffer)
-    (insert-char ?\n (light-dashboard--top-margin light-dashboard-height))
-    (setq line-prefix
-	  `(space . (:align-to (- center ,(/ light-dashboard-width 2)))))
-    (insert light-dashboard-dashboard-string)
-    (goto-char (point-min))
-    (forward-button 1)))
+  (switch-to-buffer (light-dashboard)))
 
 (provide 'light-dashboard)
 
