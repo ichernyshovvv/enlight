@@ -2,7 +2,9 @@
 
 A simple dashboard package that may be used as a startup screen in Emacs.
 
-![Demo](demo.gif)
+<p align="center">
+  <img src="demo.gif" alt="Demo gif"/>
+</p>
 
 ## Installation and configuration
 
