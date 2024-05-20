@@ -85,8 +85,8 @@
      'mouse-face 'light-dashboard-selected-face)
     (when shortcut
       (insert
-       (concat (make-string (- light-dashboard-width (length desc)) ? )
-	       (propertize shortcut 'face 'light-dashboard-key))))
+       (make-string (- light-dashboard-width (length desc)) ? )
+       (propertize shortcut 'face 'light-dashboard-key)))
     (insert "\n")))
 
 (defun light-dashboard--generate-dashboard (alist)
