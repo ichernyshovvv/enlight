@@ -51,6 +51,15 @@
 (defvar light-dashboard-width nil)
 (defvar light-dashboard-buffer-name "*light-dashboard*")
 
+;; Copied from `s-center' from s.el
+(defun light-dashboard-center-string (len s)
+  "If S is shorter than LEN, pad it with spaces so it is centered."
+  (let ((extra (max 0 (- len (length s)))))
+    (concat
+     (make-string (ceiling extra 2) ?\s)
+     s
+     (make-string (floor extra 2) ?\s))))
+
 (defun light-dashboard--max-item-length (alist)
   "Calculate max length of item-names in ALIST."
   (thread-last alist
@@ -66,10 +75,9 @@
   "Insert SECTION in the current buffer."
   (pcase-let ((`(,section-name . ,items) section))
     (insert
-     (propertize section-name
-                 'line-prefix
-                 `(space . (:align-to (- center ,(/ (length section-name) 2))))
-                 'face 'light-dashboard-section)
+     (propertize (light-dashboard-center-string
+		  light-dashboard-width section-name)
+		 'face 'light-dashboard-section)
      "\n")
     (mapc #'light-dashboard--insert-item items)))
 
