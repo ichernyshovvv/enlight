@@ -1,8 +1,9 @@
-<p align="center">
 # `enlight`
+
 Highly customizable startup screen for Emacs.
 
-<img src="demo.gif" alt="Demo gif"/>
+<p align="center">
+	<img src="demo.gif" alt="Demo gif"/>
 </p>
 
 ## Installation and configuration
@@ -59,6 +60,11 @@ M-x enlight-open
 ### Using grid.el
 
 Use can use grid.el to construct a bit more complex layouts.
+
+<p align="center">
+	<img src="gallery/complex.png"/>
+</p>
+
 
 ``` elisp
 (use-package grid
