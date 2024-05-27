@@ -21,6 +21,8 @@ Highly customizable startup screen for Emacs.
 
 ## Usage
 
+### Opening at startup
+
 You can set `initial-buffer-choice` custom variable to #'enlight in
 order to show enlight right after Emacs startup:
 
@@ -28,10 +30,20 @@ order to show enlight right after Emacs startup:
 (setopt initial-buffer-choice #'enlight)
 ```
 
+### Opening manually
+
 Also you always can switch to the buffer by calling
 
 ```
 M-x enlight-open
+```
+
+You can control where the buffer pops up via `display-buffer-alist` custom
+variable. For example, this will ensure that the buffer will be displayed in the
+current window:
+
+``` elisp
+(add-to-list 'display-buffer-alist '("\\*enlight\\*" display-buffer-same-window))
 ```
 
 ## Configuration examples and screenshots
