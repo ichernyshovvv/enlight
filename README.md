@@ -38,13 +38,8 @@ Also you always can switch to the buffer by calling
 M-x enlight-open
 ```
 
-You can control where the buffer pops up via `display-buffer-alist` custom
-variable. For example, this will ensure that the buffer will be displayed in the
-current window:
-
-``` elisp
-(add-to-list 'display-buffer-alist '("\\*enlight\\*" display-buffer-same-window))
-```
+By default, it will open the buffer in the current window, but you can change
+the behaviour by customizing `display-buffer-alist` variable.
 
 ## Configuration examples and screenshots
 

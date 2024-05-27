@@ -116,7 +116,7 @@ Also update `enlight-height', `enlight-width'."
 (defun enlight-open ()
   "Open `enlight'."
   (interactive)
-  (pop-to-buffer (enlight)))
+  (pop-to-buffer-same-window (enlight)))
 
 (provide 'enlight)
 
