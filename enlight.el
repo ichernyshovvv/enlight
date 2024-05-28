@@ -74,7 +74,7 @@ Also update `enlight-height', `enlight-width'."
   (set symbol value))
 
 (defcustom enlight-content
-  "You've been enlightened\nby enlight"
+  "You've been enlightened by enlight"
   "String to be inserted to `enlight' buffer."
   :type 'string
   :set #'enlight--update)
