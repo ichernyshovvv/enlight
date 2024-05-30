@@ -4,7 +4,7 @@
 
 ;; Author: Ilya Chernyshov <ichernyshovvv@gmail.com>
 ;; Version: 0.1
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "28.1") (compat "29.1.4.1"))
 ;; Keywords: startup, screen, tools, dashboard
 ;; URL: https://github.com/ichernyshovvv/enlight
 
@@ -28,6 +28,8 @@
 ;; Highly customizable startup screen.
 
 ;;; Code:
+
+(require 'compat)
 
 (defgroup enlight nil
   "Highly customizable startup screen."
