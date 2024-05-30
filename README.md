@@ -66,11 +66,7 @@ the behaviour by customizing `display-buffer-alist` variable.
 
 ### Using grid.el
 
-Use can use grid.el to construct a bit more complex layouts.
-
-<p align="center">
-	<img src="gallery/complex.png"/>
-</p>
+You can use [grid.el](https://github.com/ichernyshovvv/grid.el) to construct a bit more complex layouts.
 
 
 ``` elisp
@@ -82,6 +78,58 @@ Use can use grid.el to construct a bit more complex layouts.
        :vc-backend Git
        :url "https://github.com/ichernyshovvv/grid.el"
        :branch "master"))))
+```
+
+#### Two menus placed side by side
+
+<p align="center">
+	<img src="gallery/side-by-side.png"/>
+</p>
+
+``` elisp
+(require 'grid)
+
+(use-package enlight
+  :custom
+  (enlight-content
+   (grid-get-row
+    `(,(enlight-menu
+        '(("Org Mode"
+           ("Org-Agenda (current day)" (org-agenda nil "a") "a"))
+          ("Downloads"
+           ("Transmission" transmission "t")
+           ("Downloads folder" (dired "~/Downloads") "a"))
+          ("Other"
+           ("Projects" project-switch-project "p"))))
+      "   "
+      ,(enlight-menu
+        `(("Enlight Settings"
+           ("Jump to the config"
+            (progn
+              (find-file ,user-init-file)
+              (goto-char (point-min))
+              (search-forward "use-package enlight"))
+            "j")
+           ("Update"
+            (let ((beg (point)))
+              (with-current-buffer
+                  (find-file-noselect ,user-init-file)
+                (goto-char (point-min))
+                (search-forward "use-package enlight")
+                (eval-defun nil)
+                (enlight))
+              (goto-char beg))
+            "g"))))))))
+```
+
+#### Complex layout
+
+<p align="center">
+	<img src="gallery/complex.png"/>
+</p>
+
+``` elisp
+(require 'grid)
 
 (defvar enlight-lipsum "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
