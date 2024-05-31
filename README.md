@@ -41,6 +41,12 @@ M-x enlight-open
 By default, it will open the buffer in the current window, but you can change
 the behaviour by customizing `display-buffer-alist` variable.
 
+### For evil users
+
+This package does not work properly in evil mode. Feel free to send a PR to
+evil-collection. I have no any experience either in using evil mode or writing
+evil collection integrations.
+
 ## Configuration examples and screenshots
 
 ### Simple menu
