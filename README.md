@@ -2,11 +2,12 @@
 
 Highly customizable startup screen for Emacs.
 
-<p align="center">
-	<img src="demo.gif" alt="Demo gif"/>
-</p>
+- [Installation](#installation)
+- [Usage](#usage)
+- [Screenshots and configuration examples](#screenshots-and-configuration-examples)
+- [For evil users](#for-evil-users)
 
-## Installation and configuration
+## Installation
 
 ``` elisp
 (use-package enlight
@@ -41,17 +42,11 @@ M-x enlight-open
 By default, it will open the buffer in the current window, but you can change
 the behaviour by customizing `display-buffer-alist` variable.
 
-### For evil users
-
-This package does not work properly in evil mode. Feel free to send a PR to
-evil-collection. I have no any experience either in using evil mode or writing
-evil collection integrations.
-
-## Configuration examples and screenshots
+## Screenshots and configuration examples
 
 ### Simple menu
 
-<p align="center"><img src="gallery/menu.png"/></p>
+<p align="center"><img src="menu.gif" alt="Demo gif"/></p>
 
 ``` elisp
 (use-package enlight
@@ -72,8 +67,8 @@ evil collection integrations.
 
 ### Using grid.el
 
-You can use [grid.el](https://github.com/ichernyshovvv/grid.el) to construct a bit more complex layouts.
-
+You can use [grid.el](https://github.com/ichernyshovvv/grid.el) to construct a
+bit more complex layouts.
 
 ``` elisp
 (use-package grid
@@ -222,6 +217,12 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 	     `(,(propertize "THINGS TO REMEMBER" 'face 'highlight)
 	       (:content ,enlight-lipsum :width 50))))))))))))
 ```
+
+## For evil users
+
+This package does not work properly in evil mode. Feel free to send a PR to
+evil-collection. I have no any experience either in using evil mode or writing
+evil integrations.
 
 
 Thanks to @a13 and @progfolio for code review.
