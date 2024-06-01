@@ -78,7 +78,9 @@
    alist)
   (keymap-set enlight-mode-map "<remap> <next-line>" 'enlight-menu-forward-item)
   (keymap-set enlight-mode-map "<remap> <right-char>" 'enlight-forward-menu)
+  (keymap-set enlight-mode-map "<remap> <forward-char>" 'enlight-forward-menu)
   (keymap-set enlight-mode-map "<remap> <previous-line>" 'enlight-menu-backward-item)
+  (keymap-set enlight-mode-map "<remap> <backward-char>" 'enlight-backward-menu)
   (keymap-set enlight-mode-map "<remap> <left-char>" 'enlight-backward-menu))
 
 (defun enlight-menu--max-item-length (alist)
