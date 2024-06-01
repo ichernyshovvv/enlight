@@ -2,6 +2,17 @@
 
 Highly customizable startup screen for Emacs.
 
+Pros:
+- lightweight (enlight: 100 loc, enlight-menu: 170 loc) and fast
+- no external dependencies (except for [compat](https://github.com/emacs-compat/compat))
+- very flexible. `enlight-content` custom is just a string and you decide what
+  to put into it. That might be just a reminder with a list of tasks to do
+  today. Or a menu with your often used commands. Or a full-blown dashboard with
+  a lot of useful (or not) blocks of information (org-agenda, notmuch new emails
+  count, whatever). See the screenshots below.
+
+TOC
+
 - [Installation](#installation)
 - [Usage](#usage)
 - [Screenshots and configuration examples](#screenshots-and-configuration-examples)
