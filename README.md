@@ -46,7 +46,7 @@ the behaviour by customizing `display-buffer-alist` variable.
 
 ### Simple menu
 
-<p align="center"><img src="menu.gif" alt="Demo gif"/></p>
+<p align="center"><img src="gallery/menu.gif" alt="Demo gif"/></p>
 
 ``` elisp
 (use-package enlight
