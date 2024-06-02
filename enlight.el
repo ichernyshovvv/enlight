@@ -3,7 +3,7 @@
 ;; Copyright (C) 2024  Ilya Chernyshov
 
 ;; Author: Ilya Chernyshov <ichernyshovvv@gmail.com>
-;; Version: 0.1
+;; Version: 0.3
 ;; Package-Requires: ((emacs "27.1") (compat "29.1.4.1"))
 ;; Keywords: startup, screen, tools, dashboard
 ;; URL: https://github.com/ichernyshovvv/enlight
