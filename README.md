@@ -20,15 +20,10 @@ TOC
 
 ## Installation
 
+This package is available on [MELPA](https://melpa.org/#/getting-started).
+
 ``` elisp
-(use-package enlight
-  :init
-  (unless (package-installed-p 'enlight)
-    (package-vc-install
-     '(enlight
-       :vc-backend Git
-       :url "https://github.com/ichernyshovvv/enlight"
-       :branch "master"))))
+M-x package-install enlight
 ```
 
 ## Usage
