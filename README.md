@@ -1,4 +1,4 @@
-# `enlight`
+<div align="center"><img width="250em" src="gallery/logo.svg"/></div>
 
 Highly customizable startup screen for Emacs.
 
